@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#333;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:'Microsoft YaHei',sans-serif}
+.controls{margin-bottom:16px;color:#fff;font-size:14px}
+.controls button{padding:8px 20px;font-size:14px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer;margin:0 6px}
+.controls button:hover{opacity:.8}
+.controls .note{font-size:12px;color:#aaa;margin-top:8px}
+svg{border:1px solid #999;background:#fff}
+.dim{stroke:#888;stroke-width:3;stroke-dasharray:18,12}
+.dim-text{font-size:36px;fill:#888;font-family:sans-serif;font-weight:bold}
+.vertex{font-size:42px;font-weight:900;font-family:sans-serif;text-anchor:middle;dominant-baseline:central}
+.arc-label{font-size:44px;fill:#1a1a1a;font-family:sans-serif;text-anchor:middle;font-weight:bold}
+</style>
+</head>
+<body>
+
+<div class="controls">
+  <button onclick="window.print()">🖨 打印 / 保存 PDF</button>
+  <span style="margin:0 10px;color:#fff;font-size:14px;">打印时选 A4 横向拼版，或矢量 PDF</span>
+  <div class="note">打印店说明：画布 2200mm × 1200mm · 黑色弧线线宽 18mm · 白底无其他标记</div>
+</div>
+
+<!--
+  画布坐标系统：左下角为原点 (0,0)，向上 Y，向右 X，单位 mm
+  SVG 坐标 y=0 表示顶部 → 需要翻转："SVG_y = 总高 - 真实Y×0.3"
+  比例尺：1mm = 0.3px → SVG 画布 660×360px
+-->
+<svg width="660" height="360" viewBox="0 0 660 360"
+     xmlns="http://www.w3.org/2000/svg"
+     style="background:#fff;">
+
+  <!-- 画布框 -->
+  <rect x="0" y="0" width="660" height="360" fill="#fff" stroke="#ccc" stroke-width="1"/>
+
+  <!-- ====== 左侧半圆弧（右开口）: 圆心(600,600), 半径400mm ====== -->
+  <!-- SVG 圆心: (180, 180)，SVG 半径: 120 -->
+  <!-- A(600,1000) → SVG(180, 60)，D(600,200) → SVG(180, 300) -->
+  <!--
+    在真实坐标系中，A(上) → D(下)，弧向左凸。
+    在 SVG 中起点 A 在 (180,60)，终点 D 在 (180,300)，
+    sweep-flag=0（逆时针）从顶部到底部 → 向左凸 ✓
+  -->
+  <path d="M 180 60 A 120 120 0 0 0 180 300"
+        fill="none" stroke="#000" stroke-width="5.4" stroke-linecap="round"/>
+
+  <!-- ====== 右侧半圆弧（左开口）: 圆心(1600,600), 半径400mm ====== -->
+  <!-- SVG 圆心: (480, 180) -->
+  <!-- B(1600,1000) → SVG(480, 60)，C(1600,200) → SVG(480, 300) -->
+  <!-- sweep-flag=1（顺时针）从顶部到底部 → 向右凸 ✓ -->
+  <path d="M 480 60 A 120 120 0 0 1 480 300"
+        fill="none" stroke="#000" stroke-width="5.4" stroke-linecap="round"/>
+
+  <!-- ====== 顶点 A (600, 1000) → SVG (180, 60) ====== -->
+  <circle cx="180" cy="60" r="6" fill="#e94560"/>
+  <text x="155" y="50" fill="#e94560" font-size="36" font-weight="800" font-family="sans-serif">A</text>
+  <text x="70" y="42" fill="#888" font-size="22" font-family="sans-serif">A(600, 1000)</text>
+
+  <!-- ====== 顶点 B (1600, 1000) → SVG (480, 60) ====== -->
+  <circle cx="480" cy="60" r="6" fill="#58a6ff"/>
+  <text x="500" y="50" fill="#58a6ff" font-size="36" font-weight="800" font-family="sans-serif">B</text>
+  <text x="490" y="28" fill="#888" font-size="22" font-family="sans-serif">B(1600, 1000)</text>
+
+  <!-- ====== 顶点 C (1600, 200) → SVG (480, 300) ====== -->
+  <circle cx="480" cy="300" r="6" fill="#f0a500"/>
+  <text x="500" y="318" fill="#f0a500" font-size="36" font-weight="800" font-family="sans-serif">C</text>
+  <text x="490" y="342" fill="#888" font-size="22" font-family="sans-serif">C(1600, 200)</text>
+
+  <!-- ====== 顶点 D (600, 200) → SVG (180, 300) ====== -->
+  <circle cx="180" cy="300" r="6" fill="#16c79a"/>
+  <text x="155" y="318" fill="#16c79a" font-size="36" font-weight="800" font-family="sans-serif">D</text>
+  <text x="70" y="345" fill="#888" font-size="22" font-family="sans-serif">D(600, 200)</text>
+
+  <!-- 尺寸标注：A-B 水平间距 1000mm -->
+  <line x1="180" y1="20" x2="480" y2="20" stroke="#888" stroke-width="1.5" stroke-dasharray="8,4"/>
+  <line x1="180" y1="15" x2="180" y2="25" stroke="#888" stroke-width="1.5"/>
+  <line x1="480" y1="15" x2="480" y2="25" stroke="#888" stroke-width="1.5"/>
+  <text x="330" y="14" fill="#888" font-size="24" font-family="sans-serif" text-anchor="middle">⬅ 1000mm ➡</text>
+
+  <!-- 圆心标注 -->
+  <circle cx="180" cy="180" r="3" fill="#aaa"/>
+  <text x="120" y="170" fill="#aaa" font-size="20" font-family="sans-serif">O₁(600,600)</text>
+  <circle cx="480" cy="180" r="3" fill="#aaa"/>
+  <text x="492" y="170" fill="#aaa" font-size="20" font-family="sans-serif">O₂(1600,600)</text>
+
+  <!-- 半径标注 -->
+  <text x="120" y="120" fill="#1a1a1a" font-size="28" font-family="sans-serif" text-anchor="middle">R=400mm</text>
+  <text x="540" y="120" fill="#1a1a1a" font-size="28" font-family="sans-serif" text-anchor="middle">R=400mm</text>
+
+  <!-- 画布总尺寸 -->
+  <text x="330" y="380" fill="#888" font-size="22" font-family="sans-serif" text-anchor="middle">2200mm</text>
+  <text x="700" y="180" fill="#888" font-size="22" font-family="sans-serif" text-anchor="middle" transform="rotate(90,700,180)">1200mm</text>
+
+</svg>
+
+<div style="margin-top:16px;padding:14px 20px;background:#f5f5f0;border-radius:8px;max-width:660px;font-size:13px;color:#333;line-height:1.7;">
+  <b>打印店说明：</b><br>
+  🖨 格式：以画布左下角为坐标原点 (0,0)，向右为 X 轴，向上为 Y 轴，单位 mm<br>
+  📐 画布：2200mm × 1200mm，纯白色哑光底<br>
+  ⚫ 弧线：纯黑色，线宽 <b>18mm (1.8cm)</b>，边缘清晰<br>
+  🅰 左弧：圆心 (600,600)，半径 400mm，角度 90°~270°，右开口<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;A(600,1000) — D(600,200)<br>
+  🅱 右弧：圆心 (1600,600)，半径 400mm，角度 270°~90°，左开口<br>
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;B(1600,1000) — C(1600,200)<br>
+  ✅ 两弧上/下顶点水平间距均为 1000mm<br>
+  ❌ <b>除两条弧线外，画布上无任何其他标记</b>（顶点标签、坐标、圆点仅为说明用，请勿绘制到最终成品上）
+</div>
+
+</body>
+</html>
