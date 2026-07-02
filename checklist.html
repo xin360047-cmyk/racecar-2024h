@@ -2,60 +2,55 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>赛场实战 · 电赛练习题</title><link rel="stylesheet" href="style.css">
+<title>赛场实战 · 25年E题</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
 <a class="back" href="index.html">&larr; 返回首页</a>
-<div class="page-head"><h1>赛场实战：4 天 3 夜怎么安排？</h1><div class="sub">电赛不是比谁学得多，是比谁在 4 天里把东西做出来、做稳、做完</div></div>
+<div class="page-head"><h1>赛场实战：4天3夜安排</h1><div class="sub">比24H多了一套云台系统，第2天就要让它动起来</div></div>
 
-<div class="sec-title">第 1 天：读题 + 装车（今天必须让轮子转起来）</div>
+<div class="sec-title">第1天：读题 + 装车 + 舵机测试</div>
 <div class="chk">
-  <div class="item"><div class="box"></div><div><div class="txt">读题至少 3 遍，每问限制条件逐字读</div><div class="det">尤其：MSPM0 强制、无摄像头、只能前进、弧线投影不能脱线</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">画系统框图（传感器→MCU→执行器，纸笔 5 分钟）</div><div class="det">这个图决定了你要买/焊哪些模块。不要跳过</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">所有外设模块单独测试通过</div><div class="det">ADC 读灰度串口打印 | 编码器读数串口打印 | 电机 PWM 转起来 | OLED 亮 | 蜂鸣器响</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">连夜装好车！传感器焊好固定好！</div><div class="det">第 1 天必须让车能动。车装不完第 2 天没法写代码</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">读题至少3遍——新增的双电源开关、激光安全要求、画圆评分规则</div><div class="det">注意：开关分控、LED指示供电状态、紫外靶纸会消退（20~60s）</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">各模块单独测试通过——24H的硬件不变，新增的舵机+激光必须今天测通</div><div class="det">串口打印灰度/编码器/舵机角度/激光开关状态，确保每个都能正常控制</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">舵机接线+测试</div><div class="det">用测试程序让舵机转0°→90°→180°→回90°，确认PWM 50Hz配置正确、角度范围准确。云台安装固定牢靠</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">激光开关电路搭建</div><div class="det">GPIO→MOS管→激光笔。用串口助手打印"on/off"配合肉眼确认激光开关正常</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">双电源开关模组接线+LED指示</div><div class="det">开关1控制小车系统，开关2控制云台+激光。两个LED分别亮灭正常</div></div></div>
 </div>
 
-<div class="sec-title">第 2 天：直道跑通（今天必须拿下 Q1 的 20 分）</div>
+<div class="sec-title">第2天：开环循迹跑通</div>
 <div class="chk">
-  <div class="item"><div class="box"></div><div><div class="txt">搭好工程文件结构（bsp/module/algo/app/config）</div><div class="det">空函数先占位，让工程编译通过。用 TI DriverLib 不手写寄存器</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">直线 A→B 跑通（白地，陀螺仪锁航向）</div><div class="det">底线。如果今天直线都没跑稳，明天会非常被动</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">编码器里程验证（串口打印 distance，手推 1m 看显示）</div><div class="det">差太多就校准 WHEEL_DIAMETER 和 ENCODER_PPR</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">速度环 PID 调好（能稳在目标速度 ±5%）</div><div class="det">今天只开速度环，方向环明天再说</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">标定SEG_LEN和TURN_DIST</div><div class="det">走100cm测编码器脉冲、右转90°测编码器脉冲。各测3次取平均写入param.h</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">开环跑一圈：直走→右转×4→回到A</div><div class="det">中速(BASE_SPEED=400)先试，确认每圈终点位置误差。如果终点偏了太多，调整SEG_LEN</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">基本要求(1)：设定N圈跑通</div><div class="det">N=1, N=3, N=5都要试。时间≤20s/圈，速度不够就加BASE_SPEED</div></div></div>
 </div>
 
-<div class="sec-title">第 3 天：弧线攻克 + 全路径联调</div>
+<div class="sec-title">第3天：瞄准调通</div>
 <div class="chk">
-  <div class="item"><div class="box"></div><div><div class="txt">开方向环、直线跑稳</div><div class="det">DIR_KP 从 1.0 起调。确定直线 KP 后，弧线 KP 设为它的 2 倍</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">弧线段单独调（降速 + 大 KP）</div><div class="det">写一个只跑弧线的测试状态反复调参。弧线是本赛道最易翻车的地方</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">全路径联调 Q2 + Q3</div><div class="det">4 个状态切换正确 → 圈数计数对 → OLED 实时显示状态。跑 3 圈不出错才算过</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">队友开始写设计报告</div><div class="det">写报告的另一个人负责，不要让写代码的分心</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">标定云台角度→靶面位置对应表</div><div class="det">小车放在AB段几个固定位置（A点、B点、中点），手动调云台找靶心 → 记录舵机角度 → 填进coord.c</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">静态瞄准（基本要求2）</div><div class="det">小车静止，云台从归零→扫靶→锁靶心→射击。2s内完成</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">自动瞄准（基本要求3）</div><div class="det">小车放在指定位置，4s内自动瞄准击中。不用人调</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">开始写设计报告</div><div class="det">另一队友负责：方案论证+电路图+程序流程图+测试数据+靶面光斑照片</div></div></div>
 </div>
 
-<div class="sec-title">第 4 天：提速 + 报告收尾</div>
+<div class="sec-title">第4天：跑动中瞄准 + 画圆 + 收尾</div>
 <div class="chk">
-  <div class="item"><div class="box"></div><div><div class="txt">逐步加速：BASE_SPEED 每次 +50，加一级跑一圈</div><div class="det">稳了再加。不要一次加太多导致前功尽弃</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">最后一圈冲刺：Q3 第 4 圈最后一段直道超速</div><div class="det">反正不需要转弯了，最后一口气冲到终点</div></div></div>
-  <div class="item"><div class="box"></div><div><div class="txt">报告完成 + 格式检查 + 电路图 + 测试数据截图</div><div class="det">缺图缺数据是常见扣分项</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">发挥部分1：跑一圈连续射击靶心</div><div class="det">task_car() + task_gimbal() 联调。小车从A出发，激光全程射在靶心。误差≤2cm</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">发挥部分2：跑两圈</div><div class="det">验证N=2时激光稳定性。40s内完成</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">发挥部分3：画圆</div><div class="det">如果时间不够，优先保住前面所有分数再攻这个。画圆是全场最难</div></div></div>
+  <div class="item"><div class="box"></div><div><div class="txt">报告完成+格式检查</div><div class="det">电路图、流程图、测试数据表格+光斑照片全部就位</div></div></div>
 </div>
 
-<div class="sec-title">常见翻车点（提前防）</div>
+<div class="sec-title">常见翻车点</div>
 <div class="chk">
   <div class="item" style="border-color:#e9456044"><div class="box" style="border-color:#e94560"></div>
-    <div><div class="txt" style="color:#e94560">电池没电</div><div class="det">带 3 块以上满电电池。每跑完一次完整测试就换。电压低了 PID 参数全废</div></div></div>
+    <div><div class="txt" style="color:#e94560">舵机和MCU没共地</div><div class="det">舵机不转或乱转。检查GND有没有和MCU GND连通</div></div></div>
   <div class="item" style="border-color:#e9456044"><div class="box" style="border-color:#e94560"></div>
-    <div><div class="txt" style="color:#e94560">场地比预想大/小</div><div class="det">到赛场先量尺寸，改 SEG_DIAG 和 SEG_ARC。不同场地反光不同，灰度阈值现采</div></div></div>
+    <div><div class="txt" style="color:#e94560">激光引燃靶纸</div><div class="det">10mW理论上不会，但激光长时间对准一点可能焦糊。不要连续照射同一点超过5s</div></div></div>
   <div class="item" style="border-color:#f0a50044"><div class="box" style="border-color:#f0a500"></div>
-    <div><div class="txt" style="color:#f0a500">编码器累积误差</div><div class="det">4 圈下来误差可达 5~10cm。弧线段顶点用灰度丢失兜底重置 distance</div></div></div>
+    <div><div class="txt" style="color:#f0a500">开环累积误差——跑多圈后偏出赛道</div><div class="det">SEG_LEN标定不准或转弯惯性导致。灰度纠偏备份启用可缓解</div></div></div>
   <div class="item" style="border-color:#f0a50044"><div class="box" style="border-color:#f0a500"></div>
-    <div><div class="txt" style="color:#f0a500">焊接脱焊</div><div class="det">车震久了传感器线容易断。焊点打胶固定，带烙铁和备用杜邦线上场</div></div></div>
-  <div class="item"><div class="box"></div>
-    <div><div class="txt">光线干扰灰度</div><div class="det">赛场灯光不一样。灰度阈值用动态阈值（现场采一次黑白取中点），不写死</div></div></div>
-  <div class="item"><div class="box"></div>
-    <div><div class="txt">陀螺仪漂移</div><div class="det">对角线走歪大概率是陀螺仪零漂。每圈开始前原地 1 秒重新校准 heading</div></div></div>
+    <div><div class="txt" style="color:#f0a500">电池电压不同导致速度不同</div><div class="det">满电7.4V和6.5V的速度差很多。每次测试用同一块电池。带3块以上满电备用</div></div></div>
 </div>
 
-</div>
-</body>
-</html>
+</div></body></html>

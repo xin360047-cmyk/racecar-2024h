@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>瞄准算法 · 25年E题</title><link rel="stylesheet" href="style.css">
+<style>.fail-inline{background:#1a0810;border-left:3px solid #e94560;border-radius:0 8px 8px 0;padding:8px 14px;margin:8px 0;font-size:12px;color:#e94560;max-width:680px}</style>
+</head>
+<body>
+<div class="container">
+<a class="back" href="index.html">&larr; 返回首页</a>
+<div class="page-head"><h1>瞄准算法：云台PID + 坐标转换</h1><div class="sub">最难的部分——小车在动，靶面固定的，要让激光始终打在靶心或画圆</div></div>
+
+<div class="sec-title">云台控制基础</div>
+<div class="code"><span class="cm">/* 舵机控制——PWM 50Hz，脉宽 0.5ms~2.5ms 对应 0°~180° */</span>
+<span class="ty">void</span> <span class="fn">mod_gimbal_set</span>(<span class="ty">uint8_t</span> h_angle, <span class="ty">uint8_t</span> v_angle) {
+    <span class="cm">// h_angle: 0~180，水平舵机角度
+    // v_angle: 0~180，俯仰舵机角度
+    // 内部换算：angle → PWM脉宽
+    //   pulse = 500 + (angle / 180) * 2000  (单位 μs)
+    //   50Hz PWM = 周期 20000μs，占空比 pulse/20000</span>
+    uint16_t pulse_h = <span class="num">500</span> + h_angle * <span class="num">2000</span> / <span class="num">180</span>;
+    uint16_t pulse_v = <span class="num">500</span> + v_angle * <span class="num">2000</span> / <span class="num">180</span>;
+    <span class="fn">bsp_pwm_set</span>(CH_SERVO_H, pulse_h);     <span class="cm">// 水平舵机</span>
+    <span class="fn">bsp_pwm_set</span>(CH_SERVO_V, pulse_v);     <span class="cm">// 俯仰舵机</span>
+}
+<span class="cm">/* ⚠ 实际舵机 0°~180°可能不精确对应0.5~2.5ms，需要实测校准
+ *    装好云台后，写个测试程序在不同角度下标记位置对比 */</span></div>
+
+<div class="sec-title">静态瞄准流程（基本要求）</div>
+<div class="tstep">
+  <div class="tsn">1</div><div class="tsb"><div class="tst">云台回中位</div><div class="tsd">h_angle=90, v_angle=90。上电后先归零</div></div>
+</div>
+<div class="tstep">
+  <div class="tsn">2</div><div class="tsb"><div class="tst">粗略扫描靶面</div><div class="tsd">云台水平从0°→180°慢扫，激光不射（或者极短脉冲），观察靶纸上光斑最亮的区域在哪里</div></div>
+</div>
+<div class="tstep">
+  <div class="tsn">3</div><div class="tsb"><div class="tst">精确瞄准靶心</div><div class="tsd">锁定到靶心区域后，用云台PID微调，射激光确认光斑位置</div></div>
+</div>
+<div class="tstep">
+  <div class="tsn">4</div><div class="tsb"><div class="tst">射击</div><div class="tsd">激光连续照射，打靶记录</div></div>
+</div>
+
+<div class="sec-title">跑动中瞄准（发挥部分关键）</div>
+<p style="max-width:680px;font-size:13px;color:#c9d1d9;line-height:1.7;">
+小车在AB段出发，沿正方形逆时针行驶。激光要始终瞄准靶心。<br><br>
+<b>关键思路</b>：靶面相对赛道的位置固定（AB边外50cm）。小车在不同位置时，激光指向靶面的角度不同。
+</p>
+
+<div class="code"><span class="cm">/* 坐标转换：根据小车在赛道上的位置，算出云台应指的角度 */</span>
+<span class="ty">void</span> <span class="fn">coord_update</span>(<span class="ty">uint8_t</span> segment, <span class="ty">float</span> pos_in_segment) {
+    <span class="cm">// segment: 小车当前在哪条边上（0=A→B, 1=B→C, 2=C→D, 3=D→A）
+    // pos_in_segment: 在边上的位置百分比 0~1.0
+    //
+    // 靶心相对于小车的方向 = f(segment, pos_in_segment)
+    // 这个函数需要你实际测量几个点，然后插值算出任意位置的角度</span>
+
+    <span class="kw">if</span> (segment == <span class="num">0</span>) {             <span class="cm">// A→B：在AB边上横向移动</span>
+        <span class="fn">mod_gimbal_set</span>(∠水平, ∠俯仰);  <span class="cm">// 这两个值需要实测标定</span>
+    }
+}
+<span class="cm">/* ⚠ 我没办法告诉你具体数值——不同小车的云台安装高度、激光到云台的距离、靶位距离都不一样
+ *    必须自己做一次标定：车放4个顶点+边中点，手动调云台找到靶心，记录角度值，再编程插值 */</span></div>
+
+<div class="sec-title">画圆算法（发挥部分3）</div>
+<p style="max-width:680px;font-size:13px;color:#c9d1d9;line-height:1.7;">
+要求：小车跑1圈，激光在靶面上同步画1圈半径6cm的圆。<br><br>
+<b>思路</b>：靶面上半径6cm的圆 → 换算成云台角度的变化范围。小车跑全程（4条边），云台同步做一个完整的圆运动。<br><br>
+但我不确定这个换算公式该怎么算——靶面是垂直的，云台需要把水平角度和俯仰角度联动起来才能画圆，这涉及三角函数。我没有实际验证过，不能乱教。这个部分建议你查一下二维云台画圆的资料，或者实测标定几个点再拟合。
+</p>
+
+<div class="call" style="border-color:#e9456044;">
+  <div class="cttl" style="color:#e94560;">这个页面的内容我不确定的地方</div>
+  <ul>
+    <li>云台角度到靶面位置的换算公式——我没办法给出通用的准确值，必须你拿到具体硬件后实测</li>
+    <li>画圆时水平舵机和俯仰舵机的相位关系——我不确定应该用正弦还是余弦组合</li>
+    <li>上面这些内容是我根据原理推的，不是实测过的，不能保证准确性。拿到硬件后自己做标定会靠谱很多</li>
+  </ul>
+</div>
+
+</div></body></html>

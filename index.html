@@ -2,71 +2,64 @@
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>电赛练习题 · 自动行驶小车 · 从零到完赛</title><link rel="stylesheet" href="style.css">
+<title>电赛练习题 · 简易自行瞄准装置 · 从零到完赛</title><link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="topbar"><div class="logo"><span>电赛</span> 练习题</div>
-<div><a href="arch.html">架构</a><a href="system.html">框图</a><a href="track.html">赛题</a><a href="modules.html">模块</a></div></div>
+<div><a href="track.html">赛题</a><a href="modules.html">模块</a><a href="system.html">框图</a></div></div>
 <div class="container">
+
 <div class="hero">
-  <h1>电赛 <span>练习题</span> 自动行驶小车</h1>
+  <h1>电赛 <span>练习题</span> 简易自行瞄准装置</h1>
+  <div class="lead">25年E题：小车循正方形轨迹跑，同时用激光笔打靶。<br>循迹 + 二维云台控制 + 跑动中瞄准画圆，这是你的第二个电赛项目。</div>
   <div class="badges">
-    <!-- MSPM0G3507 -->
-    <span class="badge badge-red">MSPM0G3507</span><span class="badge badge-purple">CCS Theia</span><span class="badge badge-green">SysConfig</span>
+    <span class="badge badge-red">MSPM0G3507</span><span class="badge badge-purple">CCS Theia</span>
+    <span class="badge badge-green">SysConfig</span><span class="badge badge-blue">二维云台</span>
   </div>
 </div>
 
-
-
 <div class="steps">
 
-<!-- ====== 第 0 步 ====== -->
-<div class="step-group"><h2><span class="icon icon-red">0</span> 准备工作：买东西 + 装软件</h2>
+<div class="step-group"><h2><span class="icon icon-red">0</span> 准备工作：买硬件 + 装软件</h2>
 <div class="cards">
-  <a class="card" href="modules.html"><div class="num">Step 0.1</div><div class="title">模块清单：你需要准备哪些硬件</div><div class="desc">MSPM0G3507天猛星 · 8路灰度 · 四路编码器驱动 · 520电机 · MPU6050 · OLED · 蜂鸣器LED。每样是什么、怎么接、常见故障怎么修。</div><div class="tag-row"><span class="mini-tag">必读</span><span class="mini-tag">硬件百科</span></div></a>
-  <a class="card" href="ccs.html"><div class="num">Step 0.2</div><div class="title">装 CCS Theia + SysConfig 图形化配置</div><div class="desc">TI 官方 IDE。SysConfig 配引脚/时钟/外设，自动生成初始化代码。配好 ADC、PWM、I2C、UART 就能开始写 bsp。</div><div class="tag-row"><span class="mini-tag">IDE</span><span class="mini-tag">SysConfig</span></div></a>
+  <a class="card" href="modules.html"><div class="num">Step 0.1</div><div class="title">模块清单 + 硬件百科</div><div class="desc">MSPM0天猛星 · 灰度传感器 · 四路编码器驱动 · 二维云台(舵机) · 蓝紫激光笔(405nm 10mW) · A4紫外感光靶纸 · OLED · 独立双电源开关 · 蜂鸣器LED</div><div class="tag-row"><span class="mini-tag">必读</span><span class="mini-tag">新硬件</span></div></a>
+  <a class="card" href="ccs.html"><div class="num">Step 0.2</div><div class="title">装CCS + SysConfig配置</div><div class="desc">配UART、ADC、PWM×4（2个电机+2个舵机）、I2C、GPIO、编码器。一个SysConfig搞定所有外设。</div><div class="tag-row"><span class="mini-tag">IDE</span><span class="mini-tag">SysConfig</span></div></a>
 </div></div>
 
-<!-- ====== 第 1 步 ====== -->
 <div class="step-group"><h2><span class="icon icon-purple">1</span> 读懂题目：这题到底要我做什么？</h2>
 <div class="cards">
-  <a class="card" href="track.html"><div class="num">Step 1.1</div><div class="title">赛题原文 + 场地 + 四问要求 + 评分表</div><div class="desc">不用搜原题。任务描述、跑道形场地、A B C D、每问几分几秒、所有限制条件——全在这里。读完就知道要得多少分。</div><div class="tag-row"><span class="mini-tag">题目原文</span><span class="mini-tag">场地</span><span class="mini-tag">评分</span></div></a>
-  <a class="card" href="system.html"><div class="num">Step 1.2</div><div class="title">系统框图：把题目拆成传感器→计算→输出</div><div class="desc">三秒看懂数据流。你代码里只操作 4 个变量：line_pos、distance、heading、pwm_l/r。这个图是你写代码的导航。</div><div class="tag-row"><span class="mini-tag">数据流</span><span class="mini-tag">核心变量</span></div></a>
+  <a class="card" href="track.html"><div class="num">Step 1.1</div><div class="title">赛题原文 + 场地 + 三问 + 评分表</div><div class="desc">正方形100×100cm轨道 · 激光瞄准靶 · 基本3问(循迹/静态瞄准/自动瞄准) · 发挥4问(跑动中射击+画圆) · 评分规则</div><div class="tag-row"><span class="mini-tag">题目原文</span><span class="mini-tag">场地</span></div></a>
+  <a class="card" href="system.html"><div class="num">Step 1.2</div><div class="title">系统框图：小车 + 云台 = 两套子系统</div><div class="desc">一套负责走（灰度+编码器+PWM→电机），一套负责打（舵机PWM→激光指向）。两个子系统互相独立，MSPM0统一调度。</div><div class="tag-row"><span class="mini-tag">数据流</span><span class="mini-tag">核心变量</span></div></a>
 </div></div>
 
-<!-- ====== 第 2 步 ====== -->
-<div class="step-group"><h2><span class="icon icon-green">2</span> 搭项目框架：把代码分到正确的楼层</h2>
+<div class="step-group"><h2><span class="icon icon-amber">2</span> 逐个模块调通</h2>
 <div class="cards">
-  <a class="card" href="arch.html"><div class="num">Step 2.1</div><div class="title">分层架构：bsp / module / algo / app / config</div><div class="desc">每层只做一件事。出bug知道翻哪层。换硬件只改bsp，换策略只改app。按从下到上的顺序写。</div><div class="tag-row"><span class="mini-tag">目录树</span><span class="mini-tag">依赖规则</span><span class="mini-tag">为什么分层</span></div></a>
-  <a class="card" href="params.html"><div class="num">Step 2.2</div><div class="title">参数集中营 config/param.h</div><div class="desc">所有可调数字在一个文件。赛场换场地改 3 个数就行。PID参数、速度、场地尺寸全在这里。</div><div class="tag-row"><span class="mini-tag">param.h</span></div></a>
+  <a class="card" href="modules.html"><div class="num">Step 2.1</div><div class="title">模块百科：灰度 · 电机 · 编码器 · 舵机 · 激光</div><div class="desc">每个模块的接线、代码、为什么、常见翻车。新重点：舵机云台控制(50Hz PWM)、激光安全开关电路、紫外靶纸使用要点。</div><div class="tag-row"><span class="mini-tag">接口</span><span class="mini-tag">故障</span></div></a>
 </div></div>
 
-<!-- ====== 第 3 步 ====== -->
-<div class="step-group"><h2><span class="icon icon-red">3</span> 写控制算法：车怎么知道往哪走、走多快？</h2>
+<div class="step-group"><h2><span class="icon icon-green">3</span> 搭项目框架</h2>
 <div class="cards">
-  <a class="card" href="state.html"><div class="num">Step 3.1</div><div class="title">路径状态机：4个状态+切换条件</div><div class="desc">S0对角线→S1右弧→S2对角线→S3左弧→圈数+1→S0。怎么判断"到顶点"了？编码器+灰度双保险。</div><div class="tag-row"><span class="mini-tag">状态机</span><span class="mini-tag">顶点判断</span></div></a>
-  <a class="card" href="pid.html"><div class="num">Step 3.2</div><div class="title">串级 PID：外环方向+内环速度</div><div class="desc">偏右往左打，偏左往右打——就这一句话。速度环让车匀速，方向环让车巡线。增量式公式+为什么用增量式。</div><div class="tag-row"><span class="mini-tag">双环</span><span class="mini-tag">公式</span></div></a>
+  <a class="card" href="arch.html"><div class="num">Step 3.1</div><div class="title">分层架构：一套框架控制两套硬件</div><div class="desc">bsp/module/algo/app/config。小车模块 + 云台模块 在module层并列。algo层新增：云台PID(位置环) + 坐标转换。</div><div class="tag-row"><span class="mini-tag">目录树</span><span class="mini-tag">双子系统</span></div></a>
+  <a class="card" href="params.html"><div class="num">Step 3.2</div><div class="title">参数集中营</div><div class="desc">param.h 里除了PID参数、速度、场地，新增：舵机角度范围、激光打靶坐标偏移、画圆半径。</div><div class="tag-row"><span class="mini-tag">param.h</span></div></a>
 </div></div>
 
-<!-- ====== 第 4 步 ====== -->
-<div class="step-group"><h2><span class="icon icon-blue">4</span> 写代码：6步顺序，每一步写完都能测</h2>
+<div class="step-group"><h2><span class="icon icon-blue">4</span> 写控制算法</h2>
 <div class="cards">
-  <a class="card" href="skeleton.html"><div class="num">Step 4.1</div><div class="title">代码骨架：bsp→module→algo→config→app→main</div><div class="desc">每一步都有：代码写什么、为什么这样写、写完怎么测。从调通一个ADC到整车跑起来。</div><div class="tag-row"><span class="mini-tag">main.c</span><span class="mini-tag">task_control</span><span class="mini-tag">可复制</span></div></a>
+  <a class="card" href="state.html"><div class="num">Step 4.1</div><div class="title">状态机：循迹+瞄准的双线并行</div><div class="desc">与24年H不同——小车跑正方形的同时，云台要独立调节激光指向。状态分两组：小车状态+云台状态，并行运行。</div><div class="tag-row"><span class="mini-tag">双线状态机</span><span class="mini-tag">并行控制</span></div></a>
+  <a class="card" href="aiming.html"><div class="num">Step 4.2</div><div class="title">瞄准算法：云台PID + 坐标转换</div><div class="desc">静态瞄准：云台扫靶 → 找到靶心 → PID锁定。跑动画圆：小车位置+云台角度同步控制 → 激光在靶上画圆。</div><div class="tag-row"><span class="mini-tag">云台PID</span><span class="mini-tag">画圆</span></div></a>
 </div></div>
 
-<!-- ====== 第 5 步 ====== -->
-<div class="step-group"><h2><span class="icon icon-amber">5</span> 调参 + 联调</h2>
+<div class="step-group"><h2><span class="icon icon-amber">5</span> 写代码 + 调参</h2>
 <div class="cards">
-  <a class="card" href="tuning.html"><div class="num">Step 5.1</div><div class="title">PID 调参：一次只改一个数</div><div class="desc">7步逐级整定法。速度环Kp→Ki→方向环Kp→Kd→弧线大Kp→全路径联调→加速。车扭怎么办？冲出弧线怎么办？速查表。</div><div class="tag-row"><span class="mini-tag">7步法</span><span class="mini-tag">故障表</span></div></a>
+  <a class="card" href="skeleton.html"><div class="num">Step 5.1</div><div class="title">代码骨架：小车驱动 + 云台控制</div><div class="desc">main.c → task_control_car() 和 task_control_gimbal() 两个循环。舵机PWM调试、云台PID整定、循迹+瞄准联调。</div><div class="tag-row"><span class="mini-tag">main.c</span><span class="mini-tag">舵机调参</span></div></a>
 </div></div>
 
-<!-- ====== 第 6 步 ====== -->
-<div class="step-group"><h2><span class="icon icon-green">6</span> 赛场实战</h2>
+<div class="step-group"><h2><span class="icon icon-red">6</span> 赛场实战</h2>
 <div class="cards">
-  <a class="card" href="checklist.html"><div class="num">Step 6.1</div><div class="title">4 天检查清单 · 一天不漏</div><div class="desc">D1装车 · D2直道通 · D3弧线攻克 · D4提速+报告。电池没电、焊接脱焊、光线干扰——6个翻车点提前防。</div><div class="tag-row"><span class="mini-tag">时间表</span><span class="mini-tag">避坑</span></div></a>
+  <a class="card" href="checklist.html"><div class="num">Step 6.1</div><div class="title">4天检查清单</div><div class="desc">D1装车+云台组装 · D2循迹跑通 · D3静态瞄准调通 · D4跑动瞄准+画圆。新翻车点：激光安全烧坏靶纸、舵机抖动、双电源共地问题。</div><div class="tag-row"><span class="mini-tag">时间表</span><span class="mini-tag">避坑</span></div></a>
 </div></div>
 
 </div></div>
-<footer>电赛练习题 · 自动行驶小车 · MSPM0G3507 天猛星 · CCS Theia</footer>
+<footer>电赛练习题 · 2025年E题简易自行瞄准装置 · MSPM0G3507 天猛星 · CCS Theia</footer>
 </body>
 </html>

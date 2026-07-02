@@ -1,56 +1,32 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
-<head>
-<meta charset="UTF-8">
-<title>电赛H题赛道 · 打印文件</title>
+<head><meta charset="UTF-8"><title>电赛H题赛道</title>
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{background:#333;display:flex;flex-direction:column;align-items:center;padding:20px;font-family:'Microsoft YaHei',sans-serif}
-.controls{margin-bottom:16px;color:#fff;font-size:14px}
-.controls button{padding:8px 20px;font-size:14px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer}
-svg{background:#fff;border:1px solid #ccc;max-width:100%}
-</style>
-</head>
+*{margin:0;padding:0}
+body{background:#333;display:flex;flex-direction:column;align-items:center;padding:20px}
+svg{background:#fff;display:block}
+button{padding:8px 20px;background:#e94560;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:14px;margin-bottom:16px}
+.note{color:#aaa;font-size:12px;margin-top:12px;text-align:center;max-width:480px;line-height:1.6}
+
+@media print{
+  @page{size:landscape;margin:0}
+  body{padding:0;background:#fff;margin:0;width:100%;height:100%}
+  svg{width:100%;height:100vh}
+  button,.note{display:none}
+}
+</style></head>
 <body>
+<button onclick="window.print()">保存 PDF</button>
 
-<div class="controls">
-  <button onclick="window.print()">🖨 保存 PDF（A4横向拼版）</button>
-  <span style="margin-left:10px;color:#aaa;font-size:12px;">
-    只含两条纯黑弧线 · 白底无标记 · 按 2200mm×1200mm 1:1 输出
-  </span>
-</div>
-
-<!--
-  画布 2200mm × 1200mm，左下角为坐标原点 (0,0)
-  左弧：圆心 (600, 600)，半径 400mm，角度 90°~270°，向左凸 → sweep-flag=0
-        A(600,1000) → D(600,200)
-  右弧：圆心 (1600, 600)，半径 400mm，角度 270°~90°，向右凸 → sweep-flag=1
-        B(1600,1000) → C(1600,200)
-  线宽 18mm（1.8cm）
-  除两条弧线外，画布上无任何其他内容
--->
-<svg width="2200" height="1200" viewBox="0 0 2200 1200"
-     xmlns="http://www.w3.org/2000/svg">
-
-  <!-- 白色底色 -->
+<svg width="100%" viewBox="0 0 2200 1200" xmlns="http://www.w3.org/2000/svg" style="max-width:800px">
   <rect x="0" y="0" width="2200" height="1200" fill="#ffffff"/>
-
-  <!-- 左侧半圆弧：圆心(600,600)，半径 400mm，向左凸 -->
-  <path d="M 600 1000 A 400 400 0 0 0 600 200"
-        fill="none" stroke="#000000" stroke-width="18" stroke-linecap="round"/>
-
-  <!-- 右侧半圆弧：圆心(1600,600)，半径 400mm，向右凸 -->
-  <path d="M 1600 1000 A 400 400 0 0 1 1600 200"
-        fill="none" stroke="#000000" stroke-width="18" stroke-linecap="round"/>
-
+  <!-- 左弧 向左凸 线宽 18px（对应 SVG 坐标的 18 单位） -->
+  <path d="M 600 200 A 400 400 0 0 0 600 1000" fill="none" stroke="#000000" stroke-width="18" stroke-linecap="round"/>
+  <!-- 右弧 向右凸 -->
+  <path d="M 1600 200 A 400 400 0 0 1 1600 1000" fill="none" stroke="#000000" stroke-width="18" stroke-linecap="round"/>
 </svg>
 
-<div style="margin-top:16px;color:#888;font-size:13px;text-align:center;max-width:700px;line-height:1.7;">
-  画布 2200mm × 1200mm（220cm × 120cm）· 白色哑光底 · 纯黑色弧线线宽 18mm（1.8cm）<br>
-  左弧：圆心 (600,600)，半径 400mm，A(600,1000)→D(600,200)，向左凸<br>
-  右弧：圆心 (1600,600)，半径 400mm，B(1600,1000)→C(1600,200)，向右凸<br>
-  ✅ 这些打印说明文字只在屏幕上显示，打印/PDF 中<b>只有两条弧线和白色背景</b>
-</div>
-
+<div class="note">Ctrl+P → 另存为 PDF → 发给打印店<br>
+告诉打印店：<b>「等比放大到 220cm×120cm 白色哑光布，线宽对应放大为 1.8cm」</b></div>
 </body>
 </html>
